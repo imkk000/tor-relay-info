@@ -1,17 +1,19 @@
 # tor-relay-info
 
-A terminal dashboard that monitors Tor relay(s) by nickname, refreshing every 10 minutes.
+Monitors Tor relay(s) by nickname and posts their status to a Discord channel as message embeds, refreshing every 10 minutes (scheduled with [robfig/cron/v3](https://github.com/robfig/cron)).
 
 ## What it shows
 
-For each matching relay:
-- OR address(es) and running status
+One embed per matching relay:
+
+- Nickname and OR address(es) in the title
+- Running status (green when up, red when down)
 - Uptime since last restart
+- Observed bandwidth and consensus weight
 - Last seen timestamp (local time)
 - Consensus flags (e.g. Guard, Exit, Fast, Stable)
-- Observed bandwidth and consensus weight
 
-Data is fetched from the [Onionoo API](https://onionoo.torproject.org) — no authentication required.
+Relay data is fetched from the [Onionoo API](https://onionoo.torproject.org) — no authentication required.
 
 ## Install
 
@@ -29,22 +31,24 @@ go build -o tor-relay-info .
 
 ## Usage
 
+The Discord webhook URL is read from the `DISCORD_WEBHOOK_URL` environment variable (never commit it):
+
 ```sh
+export DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/.../..."
 tor-relay-info <nickname-or-fingerprint>
 ```
 
 The argument is passed as a search query to Onionoo, so partial nicknames and fingerprints work.
 
-## Example
+## Docker
 
-```
-185.220.101.1:9001 [running]
-312 hours 4 min 22 sec
-Sat, 19 Apr 2026 14:32:00 CEST
-Exit, Fast, Guard, HSDir, Running, Stable, V2Dir, Valid
-1.23 GB - 9812
+```sh
+docker build -t tor-relay-info .
+docker run --rm -e DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/.../..." \
+  tor-relay-info <nickname-or-fingerprint>
 ```
 
 ## Dependencies
 
+- [robfig/cron/v3](https://github.com/robfig/cron) — scheduling
 - [zerolog](https://github.com/rs/zerolog) — structured logging

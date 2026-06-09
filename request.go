@@ -27,7 +27,7 @@ func FetchRelays(name string) (*RelayList, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	var relays RelayList
 	if err := json.NewDecoder(resp.Body).Decode(&relays); err != nil {
 		return nil, err
